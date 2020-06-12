@@ -103,10 +103,9 @@ class Security {
       
       const ieee64 = topic.substr(9);
       //console.log(ieee64)
-      
+      try{
       let json = JSON.parse(message);
-      console.log(json)
-      try {
+      console.log(json);
             //check ieee is in network
         //console.log(this.#alloweddevices.includes(ieee64))
         if (this.#alloweddevices.includes(ieee64) != false) {
@@ -127,17 +126,16 @@ class Security {
               
               if(receivedhash == controllhash){
 
-                
-                // if(parseInt(json.messageCount) - this.getMessageCountBySensor(sen) >=
-                //  1 && json.messageCount - this.getMessageCountBySensor(sen) < 5){
-                //   console.log("received valid packet from " + sen + " with values : " + json.data);
-                //   this.setMessageCountBySensor(sen,json.messageCount);
-                // }
-                // else{
-                //   console.log("DUPLICATE MESSAGE from " + sen + " with values : " + json.data);
-                //   this.setMessageCountBySensor(sen,json.messageCount);
-                // }
-
+                                
+                if(parseInt(json.messageCount) > this.getMessageCountBySensor(sen)){
+                   console.log("received valid packet from " + sen + " with values : " + json.data);
+                   this.setMessageCountBySensor(sen,json.messageCount);
+                }
+                else{
+                   console.log("DUPLICATE MESSAGE from " + sen + " with values : " + json.data);
+                   this.setMessageCountBySensor(sen,json.messageCount);
+                }
+                            
 
 
 
@@ -182,12 +180,18 @@ class Security {
 
 
   getMessageCountBySensor(SensorID){
-    if(this.messageCount.has(SensorID.toString)){
-      this.#messagecounter.get(SensorID);
+    try{
+    if(this.#messagecounter.has(SensorID.toString)){
+       return this.#messagecounter.get(SensorID.toString);
     }
     else {
       return 1;
     }
+  }
+  catch(err){
+    console.log("error occured: " + err);
+  }
+    
   }
 
 
