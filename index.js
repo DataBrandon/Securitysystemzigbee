@@ -1,7 +1,9 @@
 //import hmacSHA256 from 'crypto-js/hmac-sha256';
 
 const mqtt = require('mqtt')
-var client = mqtt.connect('mqtt://192.168.1.217:1883')
+var client = mqtt.connect('mqtt://178.128.251.170:1883');
+client.options.username = "Debug";
+client.options.password = "wijwilleninloggen";
 var Security = require('./security');
 
 
