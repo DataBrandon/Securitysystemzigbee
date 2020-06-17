@@ -104,8 +104,9 @@ class Security {
       const ieee64 = topic.substr(9);
       //console.log(ieee64)
       try{
-      let json = JSON.parse(message);
-      console.log(json);
+          const sting = JSON.stringify(message);
+      const json = JSON.parse(message);
+      //console.log(json);
             //check ieee is in network
         //console.log(this.#alloweddevices.includes(ieee64))
         if (this.#alloweddevices.includes(ieee64) != false) {
@@ -114,33 +115,37 @@ class Security {
             //console.log("SIZE:" + this.#IEEE64tosensorID.size)
             if(this.#IEEE64tosensorID.has(ieee64)){
               const sen = this.#IEEE64tosensorID.get(ieee64);
-              const item = json.hash;
-              //console.log(item)
-              const dataraw = json.data.toString();
-              const receivedhash = this.toHexString(item);
+              const dataraw = json.data;
+              const receivedhash = json.hash.toUpperCase();
               const secret = "VeRy sEcReT "+ sen.toString();
+              //const secret = this.ascii_to_hexa(key);
               
-              const controllhash = CryptoJS.HmacSHA256(dataraw, secret).toString()
-
-              console.log("Received: " + receivedhash);
+              const controllhash = CryptoJS.HmacSHA256(dataraw, secret).toString(CryptoJS.enc.Hex).toUpperCase();
+              //console.log("controll: " + controllhash);
+              //console.log("Received: " + receivedhash);
               
               if(receivedhash == controllhash){
 
                                 
                 if(parseInt(json.messageCount) > this.getMessageCountBySensor(sen)){
-                   console.log("received valid packet from " + sen + " with values : " + json.data);
+
+                  const items = dataraw.split('|');
+                  const humidity = parseInt(items[1],16);
+                  const Illuminance = parseInt(items[2],16) * 100;
+                  const templow = parseInt(items[3],16);
+                  const temphigh = parseInt(items[4],16);
+
+                  console.log("received valid packet from " + sen + " with values : ");
+                  console.log("Temperature : " + temphigh + "," + templow + " °Celcius");
+                  console.log("Humidity : " + humidity + " %");
+                  console.log("Illuminance : " + Illuminance + " lm");
+                  console.log("------------------------------------------------------------------" + '\n');
                    this.setMessageCountBySensor(sen,json.messageCount);
                 }
                 else{
                    console.log("DUPLICATE MESSAGE from " + sen + " with values : " + json.data);
                    this.setMessageCountBySensor(sen,json.messageCount);
                 }
-                            
-
-
-
-                console.log("DEBUG: this is sensor " + sen)
-                
               }
               else{
                 console.log("DEBUG: Hash does not match")
@@ -149,17 +154,10 @@ class Security {
             else{
               console.log("this has no binding in MAC to SENSOR");
             }
-            
-            //check 
-            try {
 
-            }
-            catch (err) {
-              console.log("4" + err)
-            }
           }
           catch (err) {
-            console.log("2" + err)
+            console.log("Error building hash" + err)
           }
         }
         else {
@@ -169,9 +167,7 @@ class Security {
       catch (err) {
         console.log("1" + err)
       }
-      finally {
 
-      }
     }
     else {
       console.debug(message);
@@ -206,7 +202,9 @@ class Security {
     this.#banneddevices = this.removalFromList(this.#banneddevices, IEE64Address);
     this.#IEEE64tosensorID.push(IEE64Address, SensorID);
     //generateSecretKey(SensorID);
-
+    this.writeFiles("allowed.csv",this.#alloweddevices);
+    this.writeFiles("quarantaine.csv",this.#quarantine);
+    this.writeFiles("banned.csv",this.#banneddevices);
   }
 
 
@@ -214,6 +212,9 @@ class Security {
     this.#alloweddevices = this.removalFromList(this.#alloweddevices, IEE64Address);
     this.#quarantine.push(IEE64Address);
     this.#banneddevices = this.removalFromList(this.#banneddevices, IEE64Address);
+    this.writeFiles("allowed.csv",this.#alloweddevices);
+    this.writeFiles("quarantaine.csv",this.#quarantine);
+    this.writeFiles("banned.csv",this.#banneddevices);
   }
 
 
@@ -221,6 +222,9 @@ class Security {
     this.#alloweddevices = this.removalFromList(this.#alloweddevices, IEE64Address);
     this.#quarantine = this.removalFromList(this.#quarantine, IEE64Address);
     this.#banneddevices.push(IEE64Address);
+    this.writeFiles("allowed.csv",this.#alloweddevices);
+    this.writeFiles("quarantaine.csv",this.#quarantine);
+    this.writeFiles("banned.csv",this.#banneddevices);
   }
 
   removalFromList(array, item) { return array.filter(function (ele) { return ele == item; }); }
@@ -236,19 +240,16 @@ class Security {
 
 
 
-
-toHexString(byteArray) {
-  return Array.prototype.map.call(byteArray, function(byte) {
-    return ('0' + (byte & 0xFF).toString(16)).slice(-2);
-  }).join('');
-}
-toByteArray(hexString) {
-  var result = [];
-  for (var i = 0; i < hexString.length; i += 2) {
-    result.push(parseInt(hexString.substr(i, 2), 16));
+  ascii_to_hexa(str)
+  {
+	var arr1 = [];
+	for (var n = 0, l = str.length; n < l; n ++) 
+     {
+		var hex = Number(str.charCodeAt(n)).toString(16);
+		arr1.push(hex);
+	 }
+	return arr1.join('');
   }
-  return result;
-}
 
 
 
