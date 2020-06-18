@@ -127,16 +127,16 @@ class Security {
               if(receivedhash == controllhash){
 
                                 
-                if(parseInt(json.messageCount) > this.getMessageCountBySensor(sen)){
+                if(Number(json.messageCount) > this.getMessageCountBySensor(sen)){
 
                   const items = dataraw.split('|');
-                  const humidity = parseInt(items[1],16);
-                  const Illuminance = parseInt(items[2],16) * 100;
-                  const templow = parseInt(items[3],16);
-                  const temphigh = parseInt(items[4],16);
+                  const humidity = parseInt(items[4],16);
+                  const Illuminance = parseInt(items[5],16) * 100;
+                  const templow = parseInt(items[6],16);
+                  const temphigh = parseInt(items[7],16);
 
                   console.log("received valid packet from " + sen + " with values : ");
-                  console.log("Temperature : " + temphigh + "," + templow + " °Celcius");
+                  console.log("Temperature : " + templow + "," + temphigh + " °Celcius");
                   console.log("Humidity : " + humidity + " %");
                   console.log("Illuminance : " + Illuminance + " lm");
                   console.log("------------------------------------------------------------------" + '\n');
