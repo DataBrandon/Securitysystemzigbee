@@ -1,7 +1,7 @@
 const mqtt = require('mqtt')
-var client = mqtt.connect('mqtt://178.128.251.170:1883');
-client.options.username = "Debug";
-client.options.password = "wijwilleninloggen";
+var client = mqtt.connect('mqtt://');
+client.options.username = "";
+client.options.password = "";
 var Security = require('./security');
 
 
